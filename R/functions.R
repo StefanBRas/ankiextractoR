@@ -1,8 +1,8 @@
-to_anki_list <- function(string_list, location) {
-    anki_list <- list(name = string_list[[1]],
-      parameters = tail(string_list,-1),
-      location = location)
-    return(anki_list)
+to_anki_vec <- function(string_list, location) {
+    anki_vec <- list(name = string_list[[1]],
+      location = location,
+      parameters = paste(tail(string_list,-1), collapse = ' '))
+    return(anki_vec)
 }
 
 #' finds lines with ankixtract start comments
@@ -20,7 +20,6 @@ find_ankis <- function(source_text,
     pattern <- paste0(comment_string, "\\s+anki[^",comment_string, "$]*")
     m  <- gregexpr(pattern, source_text)
     anki_matches <- regmatches(source_text, m)
-    #sub_pattern <- paste0("(", comment_string, " anki )([^%$]*)")
     sub_pattern <- paste0("(", comment_string, "\\s+anki )([^",comment_string, "$]*)")
     only_parameters <- lapply(anki_matches, function(x) gsub(sub_pattern, "\\2", x))
     results <- vector("list", length(only_parameters)) 
@@ -28,11 +27,39 @@ find_ankis <- function(source_text,
         strings <- only_parameters[[i]]
              if (length(strings >= 1)) {
                  split_strings <- strsplit(strings, split = " ")
-                 results[[i]] <- lapply(split_strings, function(x) to_anki_list(x,i))
+                 results[[i]] <- lapply(split_strings, function(x) to_anki_vec(x,i))
              }
     }
-    return(unlist(results, recursive = FALSE))
+    results <- unlist(results, recursive = FALSE)
+    if(is.null(results)) {
+        return(NULL)
+    } else {
+    return(as.data.frame(do.call(rbind, results)))
+    }
 }
+
+extract_parameter <- function(parameter_string, parameter) {
+    pattern <- paste0(parameter,'=(.*$)')
+    has_parameter <- grepl(pattern, parameter_string)
+    results <- ifelse(has_parameter, 
+                      gsub(pattern, '\\1', parameter_string),
+                      NA)
+    return(results)
+}
+
+add_fields <- function(ankis) {
+    ankis$field <- extract_parameter(ankis$parameters, 'f')
+    for (name in unique(ankis$name)) {
+        ankis[ankis$name == name & is.na(ankis$field), 'field'] <- 
+            seq_along(ankis[ankis$name == name & is.na(ankis$field), 'field'])
+    }
+    return(ankis)
+}   
+
+merge_by_fields <- function(ankis) {
+    return(ankis)
+}
+
 
 extract_ankis <- function(source_text, ankis) {
     ankis <- lapply(ankis, function(anki) {
