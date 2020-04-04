@@ -5,6 +5,11 @@ to_anki_vec <- function(string_list, location) {
     return(anki_vec)
 }
 
+bind <- function(ankis) {
+    return(do.call(rbind.data.frame, c(ankis, stringsAsFactors = FALSE)))
+
+}
+
 #' finds lines with ankixtract start comments
 #'
 #' @param source_text text to find in
@@ -34,7 +39,7 @@ find_ankis <- function(source_text,
     if(is.null(results)) {
         return(NULL)
     } else {
-    return(as.data.frame(do.call(rbind, results)))
+    return(do.call(rbind.data.frame, c(results, stringsAsFactors = FALSE)))
     }
 }
 
@@ -56,56 +61,74 @@ add_fields <- function(ankis) {
     return(ankis)
 }   
 
+match_fields <- function(ankis) {
+    for (name in unique(ankis$name)) {
+        counts <- table(ankis[ankis$name == name, 'field'])
+        print(counts)
+    }
+    return(ankis)
+}   
+
 merge_by_fields <- function(ankis) {
     return(ankis)
 }
 
 
 extract_ankis <- function(source_text, ankis) {
-    ankis <- lapply(ankis, function(anki) {
-                        c(name = anki[['name']], 
-                          location = anki[['location']])
-                              })
-    ankis <- do.call(rbind, ankis)
-    ankis_df <- as.data.frame(ankis, stringsAsFactors = FALSE)
-    ankis_df$location <- as.numeric(ankis_df$location)
-    ankis_grouped <- tapply(ankis_df[["location"]], ankis_df[["name"]], range,
+    ankis$location <- as.numeric(ankis$location)
+    ankis_grouped <- tapply(ankis[["location"]], 
+                            interaction(ankis[["name"]], ankis[["field"]],
+                                        drop = TRUE, sep = ".."),
+                            range,
                             simplify = FALSE)
     ankis_extracted <- lapply(ankis_grouped,
-                              function(x) source_text[seq(x[1], x[2] - 1)])
+                              function(x) source_text[seq(x[1], x[2])] )
     return(ankis_extracted)
 }
 
-remove_comments <- function (texts) {
-    warning('not yet implemented')
-    return(texts)
+remove_comments <- function(texts, comment_string = "%") {
+    sub_pattern <- paste0(comment_string, "\\s+anki [^",comment_string, "$]*")
+    results <- gsub(sub_pattern, "", texts)
+    return(results)
 }
 
-parse_ankis <- function(source_text, ankis) {
-    all_names <- unique(unlist(lapply(ankis, function(anki) anki["name"])))
-    for (name in all_names) {
-
-    }
+parse_ankis <- function(extracted, ankis) {
+    list_names <- names(extracted)
+    merged <- lapply(extracted, function(x) paste(x, collapse='\n'))
+    return(merged)
 }
 
 
-ankis_to_csv <- function(filepath = NA, ankis) {
-    write.csv(filepath, ankis)
+ankis_to_csv <- function(extracted, filepath = NA) {
+    temp <- strsplit(names(extracted), '..', fixed = TRUE)
+    dataframe <- bind(temp)
+    names(dataframe)  <- c('name','field')
+    dataframe$text  <- unlist(extracted)
+    dataframe_wide <- reshape(data = dataframe,
+                              idvar = 'name',
+                              v.names = 'text',
+                              timevar = 'field',
+                              direction = 'wide')
+    write.table(x = dataframe_wide, file = filepath, 
+                row.names = FALSE, col.names = FALSE,
+                sep = ';', qmethod = 'double')
+
 }
 
 ankixtract <- function(input_filename,
                        output_filename = NA,
                        filetype = "tex",
                        comment_string = "%") {
-    source_text <- readLines(input_filename)
-    ankis <- extract_ankis(source_text,
-                           filetype,
-                           comment_string)
-    ankis_parsed  <- parse_ankis(source_text, ankis)
-    if(!is.na(filepath)) {
-        ankis_to_csv(output_filename, ankis_parsed)
+    source_text <- readLines(con = input_filename)
+    ankis <- find_ankis(source_text)
+    ankis <- add_fields(ankis)
+    source_text <- remove_comments(source_text)
+    extracted <- extract_ankis(source_text, ankis)
+    final <- parse_ankis(extracted, ankis)
+    if(!is.na(output_filename)) {
+        ankis_to_csv(final, output_filename)
     } else {
-        return(ankis_parsed)
+        return(final)
     }
     return(1)
 }

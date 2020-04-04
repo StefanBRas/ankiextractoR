@@ -11,13 +11,11 @@ latex_1_whitespace <- c("l1", "l2 %  anki myname", "l3", "l4 % anki myname")
 latex_2_whitespace <- c("l1", "l2 % anki myname_1 % anki myname_2 ")
 
 
-test_df_1 <- as.data.frame(do.call(rbind, 
-                       list(to_anki_vec('myname', 2),
-                            to_anki_vec('myname', 4))))
+test_df_1 <- bind(list(to_anki_vec('myname', 2),
+                       to_anki_vec('myname', 4)))
 
-test_df_2 <- as.data.frame(do.call(rbind, 
-                       list(to_anki_vec('myname_1', 2),
-                            to_anki_vec('myname_2', 2))))
+test_df_2 <- bind(list(to_anki_vec('myname_1', 2),
+                       to_anki_vec('myname_2', 2)))
 
 context('find ankis')
 
@@ -60,17 +58,17 @@ latex_parm_2 <- c("l1", "l2 % anki myname parm_1", "l3", "l4 % anki myname parm_
 latex_parm_mult_1 <- c("l1", "l2 % anki myname parm1 parm2", "l3", "l4 % anki myname parm")
 latex_parm_mult_2 <- c("l1", "l2 % anki myname parm_1 parm_2", "l3", "l4 % anki myname parm_2")
 
-test_df_1_param <- as.data.frame(do.call(rbind, list(to_anki_vec(c('myname','parm'), 2),
-                    to_anki_vec(c('myname','parm'), 4))))
+test_df_1_param <- bind(list(to_anki_vec(c('myname','parm'), 2),
+                    to_anki_vec(c('myname','parm'), 4)))
 
-test_df_2_param <- as.data.frame(do.call(rbind, list(to_anki_vec(c('myname','parm_1'), 2),
-                    to_anki_vec(c('myname','parm_2'), 4))))
+test_df_2_param <- bind(list(to_anki_vec(c('myname','parm_1'), 2),
+                    to_anki_vec(c('myname','parm_2'), 4)))
 
-test_df_1_param_mult <- as.data.frame(do.call(rbind, list(to_anki_vec(c('myname','parm1', 'parm2'), 2),
-                    to_anki_vec(c('myname','parm'), 4))))
+test_df_1_param_mult <- bind(list(to_anki_vec(c('myname','parm1', 'parm2'), 2),
+                    to_anki_vec(c('myname','parm'), 4)))
 
-test_df_2_param_mult <- as.data.frame(do.call(rbind, list(to_anki_vec(c('myname','parm_1', 'parm_2'), 2),
-                    to_anki_vec(c('myname','parm_2'), 4))))
+test_df_2_param_mult <- bind(list(to_anki_vec(c('myname','parm_1', 'parm_2'), 2),
+                    to_anki_vec(c('myname','parm_2'), 4)))
 
 test_that("parameters - single - latex", {
               expect_equal(find_ankis(latex_parm_1), test_df_1_param)
@@ -144,32 +142,68 @@ test_that("Add mix of given and unknown fields", {
   expect_fields_equal(fields_mix_2, c('1', 'field1', '2', 'field2'))
 })
 
+
+test_that("Match works", {
+  expect_fields_equal(fields_mix_1, c('field1', '1'))
+  expect_fields_equal(fields_mix_2, c('1', 'field1', '2', 'field2'))
+})
+
+
+
+
 context('extract')
 
-latex_1_found <- find_ankis(latex_1)
-latex_2_found <- find_ankis(latex_2)
+latex_1_found <- add_fields(find_ankis(latex_1))
+latex_2_found <- add_fields(find_ankis(latex_2))
 
-basic_1_extracted <- list(
-                          myname = c("l2 % anki myname", "l3")
+basic_1_extracted <- bind(list(
+                          myname..1 = c("l2 % anki myname", "l3", "l4 % anki myname"))
 )
 
-basic_2_extracted <- list(
+basic_2_extracted <- bind(list(
                           myname_1 = c("l2 % anki myname_1 % anki myname_2"),
-                          myname_2 = c("l2 % anki myname_1 % anki myname_2")
+                          myname_2 = c("l2 % anki myname_1 % anki myname_2"))
 )
 
 
 test_that("Basic extract tests", {
+              skip('not yet implemented thing to test against')
               extract_1  <- extract_ankis(latex_1, latex_1_found)
               extract_2  <- extract_ankis(latex_2, latex_2_found)
-              expect_equal(extract_1, basic_1_extracted)
-              expect_equal(extract_2, basic_2_extracted)
+              expect_equivalent(extract_1, basic_1_extracted)
+              expect_equivalent(extract_2, basic_2_extracted)
 })
 
 
+test_that("Removes comments", {
+              expect_equal(remove_comments(latex_1), c("l1", "l2 ", "l3", "l4 "))
+              expect_equal(remove_comments(latex_2), c("l1", "l2 "))
+})
+
 context("edgecases")
+
+test_that('warning if fieldname has .. which is used as seperator in tapply', {
+              testthat::skip('not yet implemented')
+})
 
 test_that('escape quotation marks', {
               testthat::skip('not yet implemented')
 })
+
+context('Full runs on files')
+
+
+test_that("all .tex files", {
+              tdir <-'testfiles/' 
+              edir <-'expectedfiles/' 
+              test_files <- list.files(tdir, pattern = '\\.tex')
+              for (testfile in test_files) {
+                  tmp_file <- tempfile()
+                  ankixtract(paste0(tdir,testfile), tmp_file)
+                  expected <- paste0(edir, testfile)
+                  expect_equal(readLines(tmp_file), readLines(expected))
+                  unlink(tmp_file)
+              }
+})
+
 
