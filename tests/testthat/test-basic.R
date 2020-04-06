@@ -201,6 +201,10 @@ test_that("all .tex files", {
                   tmp_file <- tempfile()
                   ankixtract(paste0(tdir,testfile), tmp_file)
                   expected <- paste0(edir, testfile)
+                  if (!file.exists(expected)) {
+                          skip(paste0('There is no expected file for: ',
+                                      testfile))
+                          }
                   expect_equal(readLines(tmp_file), readLines(expected))
                   unlink(tmp_file)
               }
