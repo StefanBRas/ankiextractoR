@@ -61,19 +61,6 @@ add_fields <- function(ankis) {
     return(ankis)
 }   
 
-match_fields <- function(ankis) {
-    for (name in unique(ankis$name)) {
-        counts <- table(ankis[ankis$name == name, 'field'])
-        print(counts)
-    }
-    return(ankis)
-}   
-
-merge_by_fields <- function(ankis) {
-    return(ankis)
-}
-
-
 extract_ankis <- function(source_text, ankis) {
     ankis$location <- as.numeric(ankis$location)
     ankis_grouped <- tapply(ankis[["location"]], 
@@ -122,7 +109,7 @@ ankixtract <- function(input_filename,
     source_text <- readLines(con = input_filename)
     ankis <- find_ankis(source_text)
     ankis <- add_fields(ankis)
-    source_text <- remove_comments(source_text)
+    source_text <- remove_comments(source_text, comment_string)
     extracted <- extract_ankis(source_text, ankis)
     final <- parse_ankis(extracted, ankis)
     if(!is.na(output_filename)) {
