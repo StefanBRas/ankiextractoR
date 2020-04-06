@@ -87,7 +87,7 @@ powerhouse of the cell % anki mitochondrion f=2back
 
 ### Position of fields
 
-By extension of the above, the fields does not have to show up in the correct order in your source text. Say that you have an note type with the fields 'Name', 'Front', 'Back', 'Notes', in that order (Where 'Name' is the field used to identify a note). Then
+By extension of the above, the fields does not have to show up in the correct order in your source text. Say that you have an note type with the fields 'Name', 'Front', 'Back', 'Notes' in that order (where 'Name' is the field used to identify a note). Then
 
 ```tex
 in 1890, Richard Altmann established mitochondrion as cell organelles. % anki mitochondrion f=3notes
@@ -99,7 +99,7 @@ Will map each line to the correct field.
 
 ### Exluding fields
 
-If you exclude the 'f=' argument, ankiextract will automatically name the field. The naming scheme is integers in increasing order. So
+If you exclude the 'f=' argument, ankiextractoR will automatically name the field. The naming scheme is integers in increasing order. So
 
 ```tex
 The mitochondrion is the % anki mitochondrion f=1
