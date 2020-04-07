@@ -13,7 +13,7 @@ Note that right now only the most basic functionality is implemented.
 
 A basic example of use could be having a file with
 
-``` r
+``` tex
 This is the front or first field of the card % anki examplenote
 This is the back or second field of the card % anki examplenote
 ```
@@ -32,7 +32,7 @@ devtools::install_github("StefanBRas/ankiextractoR")
 
 ## Example
 
-ankiextractoR works by appending comments in your text documents in the format `<comment-symbol(s)> anki <note-name> f=<fieldname> <additional-args>`. This could look like `% anki theorem5 f=front` for .tex files.
+ankiextractoR works by looking for comments in your text documents in the format `<comment-symbol(s)> anki <note-name> f=<fieldname> <additional-args>`. This could look like `% anki theorem5 f=front` for .tex files.
 
 
 ### Basic example
@@ -44,7 +44,7 @@ The mitochondrion is the powerhouse of the cell
 
 Then add comments like this
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion f=1
 powerhouse of the cell % anki mitochondrion f=2
 ```
@@ -66,7 +66,7 @@ You should get a popup saying 'Importing complete. 1 notes added, 0 notes update
 
 By default, only the line with the anki-extract tag will be extracted. If there are two or more tags with the same name and field all lines between those will be extracted. So in
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion f=1
 powerhouse % anki mitochondrion f=2
 of
@@ -80,16 +80,16 @@ the last four lines will correctly be extracted to the second field (as text wit
 
 You don't have to use integers to name fields with the `f=` argument. `f=front` is just as valid as `f=1`. However, fields are sorted by the field name (i think). So if you want to name them, prepend a number like so:
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion f=1front
 powerhouse of the cell % anki mitochondrion f=2back
 ```
 
 ### Position of fields
 
-By extension of the above, the fields does not have to show up in the correct order in your source text. Say that you have an note type with the fields 'Name', 'Front', 'Back', 'Notes', in that order (Where 'Name' is the field used to identify a note). Then
+By extension of the above, the fields does not have to show up in the correct order in your source text. Say that you have an note type with the fields 'Name', 'Front', 'Back', 'Notes' in that order (where 'Name' is the field used to identify a note). Then
 
-```
+```tex
 in 1890, Richard Altmann established mitochondrion as cell organelles. % anki mitochondrion f=3notes
 The mitochondrion is the % anki mitochondrion f=1front
 powerhouse of the cell % anki mitochondrion f=2back
@@ -99,23 +99,23 @@ Will map each line to the correct field.
 
 ### Exluding fields
 
-If you exclude the 'f=' argument, ankiextract will automatically name the field. The naming scheme is integers in increasing order. So
+If you exclude the 'f=' argument, ankiextractoR will automatically name the field. The naming scheme is integers in increasing order. So
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion f=1
 powerhouse of the cell % anki mitochondrion f=2
 ```
 
 will yield the same as 
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion
 powerhouse of the cell % anki mitochondrion
 ```
 
 You can also mix including and excluding the tag, so
 
-```
+```tex
 in 1890, Richard Altmann established mitochondrion as cell organelles. % anki mitochondrion f=3notes
 The mitochondrion is the % anki mitochondrion 
 powerhouse of the cell % anki mitochondrion
@@ -123,7 +123,7 @@ powerhouse of the cell % anki mitochondrion
 
 will yield the same as
 
-```
+```tex
 in 1890, Richard Altmann established mitochondrion as cell organelles. % anki mitochondrion f=3notes
 The mitochondrion is the % anki mitochondrion f=1
 powerhouse of the cell % anki mitochondrion f=2
@@ -144,9 +144,9 @@ will yield the `The mitochondrion is the {{c1::powerhouse }} of the cell`
 
 ## Contributions
 
-You a very welcome to use Issues but note that most of the features will probably not be implemented in this version.
+You are very welcome to use Issues for bugs and feature requests but note that most features will probably not be implemented in this version.
 
-It is a big help if you accompany feature requests and bug reports with a test file and the associated expected output. See `tests/testthat/testfiles/` and `tests/testthat/expectedfiles/` for examples of how they should look.
+It is a big help if you accompany feature requests and bug reports with a test file and the associated expected output. See `tests/testthat/testfiles/` and `tests/testthat/expectedfiles/` for examples of how they should look. 
 
 If you want to run the tests yourself, fork the repo and use `devtools::test()`.
 
