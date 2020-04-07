@@ -162,7 +162,7 @@ If you want to run the tests yourself, fork the repo and use `devtools::test()`.
 - [ ] Add support for different number of fields in a document.
 - [ ] Settle on a format style for the inline arguments (f=1, f:1, -f 1?).
 - [ ] Command line interface.
-- [ ] Add support for cloze. 
+- [X] Add support for cloze. 
 - [ ] Port to Python
 - [ ] Integrate into Anki as addon
 
