@@ -118,9 +118,9 @@ expect_fields_equal <- function(ankis, true_fields) {
 }
 
 test_that("Add missing", {
-  expect_fields_equal(missing_fields_single_name, 1:5)
-  expect_fields_equal(missing_fields_two_names, c(1,2,1,2,3))
-  expect_fields_equal(missing_fields_two_names_mixed, c(1,1,2,2,3))
+  expect_fields_equal(missing_fields_single_name, as.character(1:5))
+  expect_fields_equal(missing_fields_two_names, c('1',2,1,2,3))
+  expect_fields_equal(missing_fields_two_names_mixed, c('1',1,2,2,3))
 })
 
 latex_fields_1 <- c("l1", "l2 % anki myname f=field1", "l3", "l4 % anki myname f=field1")

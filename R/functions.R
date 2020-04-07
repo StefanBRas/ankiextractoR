@@ -44,12 +44,14 @@ find_ankis <- function(source_text,
 }
 
 extract_parameter <- function(parameter_string, parameter) {
-    pattern <- paste0(parameter,'=(.*$)')
+    pattern <- paste0(parameter,'=([[:alnum:]]*)')
     has_parameter <- grepl(pattern, parameter_string)
-    results <- ifelse(has_parameter, 
-                      gsub(pattern, '\\1', parameter_string),
-                      NA)
-    return(results)
+    parameters <- regmatches(parameter_string, regexpr(pattern, parameter_string))
+    vals <- gsub(pattern, '\\1', parameters)
+    results <- has_parameter
+    results[!has_parameter] <- NA
+    results[has_parameter] <- vals
+    return(as.character(results))
 }
 
 add_fields <- function(ankis) {
@@ -61,11 +63,16 @@ add_fields <- function(ankis) {
     return(ankis)
 }   
 
+add_name_field <- function(ankis) {
+    ankis[['name_field']] <- interaction(ankis[["name"]], ankis[["field"]],
+                                        drop = TRUE, sep = "..")
+    return(ankis)
+}
+
 extract_ankis <- function(source_text, ankis) {
     ankis$location <- as.numeric(ankis$location)
-    ankis_grouped <- tapply(ankis[["location"]], 
-                            interaction(ankis[["name"]], ankis[["field"]],
-                                        drop = TRUE, sep = ".."),
+    ankis_grouped <- tapply(ankis[["location"]],
+                            ankis[['name_field']],
                             range,
                             simplify = FALSE)
     ankis_extracted <- lapply(ankis_grouped,
@@ -79,8 +86,37 @@ remove_comments <- function(texts, comment_string = "%") {
     return(results)
 }
 
-parse_ankis <- function(extracted, ankis) {
+cloze_parser <- function(extracted, ankis) {
+    arg_vals <- extract_parameter(ankis$parameters, 'c')
+    temp_fun <- function (text_lines, location, value) {
+        text_lines[[location]] <- paste0('{{c', value, '::', text_lines[[location]],'}}')
+        return(text_lines)
+    }
+    results <- mapply(FUN = temp_fun ,
+           extracted, ankis[['rel_loc']], arg_vals,
+           SIMPLIFY = FALSE)
+    return(results)
+}
+
+
+PARSERS <- list(list(argument = 'c', parser = cloze_parser)
+
+                )
+
+add_relative_location <- function(ankis) {
+    min_loc <- tapply(ankis[["location"]], ankis[['name_field']], min)
+    ankis[['rel_loc']] <- ankis[['location']] - min_loc[ankis[['name_field']]] + 1
+    return(ankis)
+}
+
+parse_ankis <- function(extracted, ankis, parsers = 'all') {
     list_names <- names(extracted)
+    for (parser in PARSERS) {
+        has_arg <- !is.na(extract_parameter(ankis[['parameters']],
+                                            parser[['argument']]))
+        name_fields <- ankis[has_arg, 'name_field']
+        extracted[name_fields] <- parser$parser(extracted[name_fields], ankis[has_arg,])
+    }
     merged <- lapply(extracted, function(x) paste(x, collapse='\n'))
     return(merged)
 }
@@ -109,6 +145,8 @@ ankixtract <- function(input_filename,
     source_text <- readLines(con = input_filename)
     ankis <- find_ankis(source_text)
     ankis <- add_fields(ankis)
+    ankis <- add_name_field(ankis)
+    ankis <- add_relative_location(ankis)
     source_text <- remove_comments(source_text, comment_string)
     extracted <- extract_ankis(source_text, ankis)
     final <- parse_ankis(extracted, ankis)

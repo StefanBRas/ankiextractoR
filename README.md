@@ -129,6 +129,19 @@ The mitochondrion is the % anki mitochondrion f=1
 powerhouse of the cell % anki mitochondrion f=2
 ```
 
+### Cloze 
+
+The argument for cloze is `c=<cloze_number>` so
+
+
+```
+The mitochondrion is the % anki mitochondrion f=1
+powerhouse % anki mitochondrion f=1 c=1
+of the cell % anki mitochondrion f=1
+```
+
+will yield the `The mitochondrion is the {{c1::powerhouse }} of the cell`
+
 ## Contributions
 
 You a very welcome to use Issues but note that most of the features will probably not be implemented in this version.
