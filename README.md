@@ -154,6 +154,19 @@ powerhouse of the cell  % anki mitochondrion % anki mitochondrion_cloze f=1 c=1
 
 will yield one file with two fields (Front/Back) and one with a single field and cloze.
 
+### Latex tags 
+
+Using `l=1` will enclose a field with `[latex] ... [\latex]`. 
+This should only be included a single time for a field. So
+
+```tex
+\frac12 % anki frac f=1 l=1 
+\geq 0 % anki frac f=1 
+```
+
+will yield `[latex] \frac12 \n \geq 0 [\latex]`. Which i guess may break, 
+given the newline.
+
 
 ## Contributions
 

@@ -99,9 +99,31 @@ cloze_parser <- function(extracted, ankis) {
 }
 
 
-PARSERS <- list(list(argument = 'c', parser = cloze_parser)
 
+
+PARSERS <- list(list(argument = 'c', parser = cloze_parser)
                 )
+
+latex_parser <- function(extracted, ankis) {
+    arg_vals <- extract_parameter(ankis$parameters, 'l')
+    temp_fun <- function (field_text, location, value) {
+        field_text <- paste0('[latex]', field_text, '[\\latex]')
+        return(field_text)
+    }
+    results <- mapply(FUN = temp_fun ,
+           extracted,
+           arg_vals,
+           SIMPLIFY = FALSE)
+    return(results)
+}
+# parses after all strings in a field is merged into a single string
+POST_PARSERS <- list(
+                     list(argument = 'l', parser = latex_parser)
+
+)
+
+
+
 
 add_relative_location <- function(ankis) {
     min_loc <- tapply(ankis[["location"]], ankis[['name_field']], min)
@@ -118,6 +140,12 @@ parse_ankis <- function(extracted, ankis, parsers = 'all') {
         extracted[name_fields] <- parser$parser(extracted[name_fields], ankis[has_arg,])
     }
     merged <- lapply(extracted, function(x) paste(x, collapse='\n'))
+    for (parser in POST_PARSERS) {
+        has_arg <- !is.na(extract_parameter(ankis[['parameters']],
+                                            parser[['argument']]))
+        name_fields <- ankis[has_arg, 'name_field']
+        merged[name_fields] <- parser$parser(merged[name_fields], ankis[has_arg,])
+    }
     return(merged)
 }
 
