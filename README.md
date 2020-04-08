@@ -134,13 +134,26 @@ powerhouse of the cell % anki mitochondrion f=2
 The argument for cloze is `c=<cloze_number>` so
 
 
-```
+```tex
 The mitochondrion is the % anki mitochondrion f=1
-powerhouse % anki mitochondrion f=1 c=1
-of the cell % anki mitochondrion f=1
+powerhouse of the cell  % anki mitochondrion f=1 c=1
 ```
 
-will yield the `The mitochondrion is the {{c1::powerhouse }} of the cell`
+will yield the `The mitochondrion is the {{c1::powerhouse  of the cell }}`
+
+### Different card types/amount of fields in a single file
+
+If any extractions differ in the amount of fields, one output file will be made for each, 
+where the number of fields are appended to the filename (which is suboptimal as it will then become <file>.tex1).
+Then you can import them file by file in Anki. So:
+
+```tex
+The mitochondrion is the % anki mitochondrion % anki mitochondrion_cloze f=1
+powerhouse of the cell  % anki mitochondrion % anki mitochondrion_cloze f=1 c=1
+```
+
+will yield one file with two fields (Front/Back) and one with a single field and cloze.
+
 
 ## Contributions
 
@@ -153,13 +166,12 @@ If you want to run the tests yourself, fork the repo and use `devtools::test()`.
 ## Known limitations
 
 - The name of a card must be unique across all your decks, so be sure to not repeat names.
-- all notes from a file will have to be imported into the same deck.
-- all notes from a file will have to have the same amount of fields.
+- all notes from a file will have to be imported into the same deck. (unless they differ in number of fields)
 
 ## Roadmap/TODOs
 
 - [ ] Add these todos as issues instead.
-- [ ] Add support for different number of fields in a document.
+- [X] Add support for different number of fields in a document.
 - [ ] Settle on a format style for the inline arguments (f=1, f:1, -f 1?).
 - [ ] Command line interface.
 - [X] Add support for cloze. 
