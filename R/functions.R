@@ -132,10 +132,20 @@ ankis_to_csv <- function(extracted, filepath = NA) {
                               v.names = 'text',
                               timevar = 'field',
                               direction = 'wide')
-    write.table(x = dataframe_wide, file = filepath, 
-                row.names = FALSE, col.names = FALSE,
-                sep = ';', qmethod = 'double')
-
+    fields_amount <- apply(dataframe_wide, 1, function(x) sum(!is.na(x))) - 1 # name column
+    if (length(unique(fields_amount)) == 1) {
+        write.table(x = dataframe_wide, file = filepath, 
+                    row.names = FALSE, col.names = FALSE,
+                    sep = ';', qmethod = 'double')
+    } else {
+        for (fields in unique(fields_amount)) {
+            dataframe_subset<- dataframe_wide[fields_amount == fields, seq(1, fields + 1)]
+            write.table(dataframe_subset,
+                        file = paste0(filepath, fields), 
+                        row.names = FALSE, col.names = FALSE,
+                        sep = ';', qmethod = 'double')
+        }
+    }
 }
 
 ankixtract <- function(input_filename,
