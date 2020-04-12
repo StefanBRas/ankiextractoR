@@ -134,10 +134,13 @@ add_relative_location <- function(ankis) {
 parse_ankis <- function(extracted, ankis, parsers = 'all') {
     list_names <- names(extracted)
     for (parser in PARSERS) {
-        has_arg <- !is.na(extract_parameter(ankis[['parameters']],
-                                            parser[['argument']]))
+        has_arg <- which(!is.na(extract_parameter(ankis[['parameters']],
+                                            parser[['argument']])))
+        for (anki in has_arg) {
+            name_field <- ankis[anki, 'name_field']
+            extracted[name_field] <- parser$parser(extracted[name_field], ankis[anki,])
+        }
         name_fields <- ankis[has_arg, 'name_field']
-        extracted[name_fields] <- parser$parser(extracted[name_fields], ankis[has_arg,])
     }
     merged <- lapply(extracted, function(x) paste(x, collapse='\n'))
     for (parser in POST_PARSERS) {
