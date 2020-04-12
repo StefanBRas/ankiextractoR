@@ -107,7 +107,7 @@ PARSERS <- list(list(argument = 'c', parser = cloze_parser)
 latex_parser <- function(extracted, ankis) {
     arg_vals <- extract_parameter(ankis$parameters, 'l')
     temp_fun <- function (field_text, location, value) {
-        field_text <- paste0('[latex]', field_text, '[\\latex]')
+        field_text <- paste0('[latex]', field_text, '[/latex]')
         return(field_text)
     }
     results <- mapply(FUN = temp_fun ,
