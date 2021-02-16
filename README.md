@@ -56,7 +56,7 @@ In an R console run
 > ankixtract('mitochondrion.tex', 'mitochondrion.ankinotes', comment_string = '%')
 ```
 
-Now open Anki and select Tools > Manage Note Types (ctrl + shift + a). Press 'Add' and then select 'Add:Basic'. Call it whatever you like - i choose 'Basic-extract'. Press 'OK'. Find the card in the list, highlight it and select 'Fields'. Press 'Add' and write 'Name'. Press 'OK'. Highlight the '3: Name: and press 'Reposition'. Write '1' and press 'OK'.
+Now open Anki and select Tools > Manage Note Types (ctrl + shift + n). Press 'Add' and then select 'Add:Basic'. Call it whatever you like - i choose 'Basic-extract'. Press 'OK'. Find the card in the list, highlight it and select 'Fields'. Press 'Add' and write 'Name'. Press 'OK'. Highlight the '3: Name: and press 'Reposition'. Write '1' and press 'OK'.
 
 Still in Anki, select File > Import... (ctrl + shift + i) and then select `mitochondrion.ankinotes`. For 'Type' select 'Basic-extract' and then whatever deck you want to import it into. Press 'Import'.
 
